@@ -38,12 +38,17 @@ except Exception as e:
 
 def extract_all_audio_data(file_path):
     try:
-        audio, sample_rate = librosa.load(file_path, sr=16000)
-        audio, _ = librosa.effects.trim(audio, top_db=20)
+        # PENTING: Ubah sr=16000 menjadi sr=None agar sama dengan skrip training kamu
+        audio, sample_rate = librosa.load(file_path, sr=None)
         
+        # Ekstrak matriks MFCC asli (untuk visualisasi spektrogram)
         mfcc_matrix = librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=N_MFCC)
+        
+        # Hitung statistik mean dan std (persis seperti skrip training kamu)
         mfcc_mean = np.mean(mfcc_matrix.T, axis=0)
         mfcc_std = np.std(mfcc_matrix.T, axis=0)
+        
+        # Gabungkan menjadi vektor fitur tunggal (total 80 fitur)
         features_vector = np.hstack((mfcc_mean, mfcc_std))
         
         return features_vector, mfcc_matrix, sample_rate

@@ -16,7 +16,7 @@ from datetime import datetime
 # KONFIGURASI HALAMAN
 # ==========================================
 st.set_page_config(
-    page_title="AI Voice Studio",
+    page_title="Autobots",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -864,7 +864,7 @@ def extract_all_audio_data(file_path):
             np.std(delta2.T, axis=0)
         ])
 
-        return features_vector, mfcc_matrix, sample_rate
+        return features_vector, mfcc_matrix, sample_rate, audio
 
     except Exception as e:
         st.error(f"Gagal memproses rekaman suara: {e}")
@@ -898,7 +898,7 @@ if "last_confidence" not in st.session_state:
 st.markdown("""
 <div class="hero-wrapper">
     <div class="hero-eyebrow">AI-Powered Audio Intelligence</div>
-    <h1 class="hero-title">AI Voice Studio</h1>
+    <h1 class="hero-title">Autobots</h1>
     <p class="hero-subtitle">Transform speech into intelligence and text into natural voice with AI-powered audio technology.</p>
     <div class="hero-divider"></div>
 </div>
@@ -986,7 +986,7 @@ with tab1:
                 with open(temp_path, "wb") as f:
                     f.write(recorded_audio.getbuffer())
 
-                features, mfcc_matrix, sr = extract_all_audio_data(temp_path)
+                features, mfcc_matrix, sr, audio = extract_all_audio_data(temp_path)
 
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
@@ -1033,6 +1033,62 @@ with tab1:
                             </div>
                             """, unsafe_allow_html=True)
 
+                    st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
+
+                    st.markdown("""
+                    <div style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 0.75rem;">
+                    Audio Waveform
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    fig_wave, ax_wave = plt.subplots(figsize=(12,3))
+
+                    librosa.display.waveshow(
+                        audio,
+                        sr=sr,
+                        ax=ax_wave
+                    )
+
+                    ax_wave.set_title("Audio Signal")
+                    ax_wave.set_xlabel("Time (s)")
+                    ax_wave.set_ylabel("Amplitude")
+
+                    st.pyplot(fig_wave)
+
+                    st.markdown("""
+<div style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 0.75rem;">
+Mel Spectrogram
+</div>
+""", unsafe_allow_html=True)
+
+                    mel_spec = librosa.feature.melspectrogram(
+                        y=audio,
+                        sr=sr,
+                        n_mels=128
+                    )
+
+                    mel_db = librosa.power_to_db(
+                        mel_spec,
+                        ref=np.max
+                    )
+
+                    fig_mel, ax_mel = plt.subplots(figsize=(12,5))
+
+                    img = librosa.display.specshow(
+                        mel_db,
+                        sr=sr,
+                        x_axis='time',
+                        y_axis='mel',
+                        cmap='jet',
+                        ax=ax_mel
+                    )
+
+                    fig_mel.colorbar(img, ax=ax_mel)
+
+                    ax_mel.set_title("Mel Spectrogram")
+
+                    st.pyplot(fig_mel)
+
                     # MFCC Plotly Visualization
                     st.markdown("<div style='height: 1.5rem'></div>", unsafe_allow_html=True)
                     st.markdown("""
@@ -1043,13 +1099,7 @@ with tab1:
                     fig = go.Figure(data=go.Heatmap(
                         z=mfcc_matrix,
                         x=times,
-                        colorscale=[
-                            [0, '#0B0B0D'],
-                            [0.25, '#3D2B1A'],
-                            [0.5, '#8B7355'],
-                            [0.75, '#C8A96B'],
-                            [1.0, '#F5E6C8']
-                        ],
+                        colorscale='Turbo',
                         showscale=True,
                         colorbar=dict(
                             bgcolor='rgba(0,0,0,0)',
@@ -1294,7 +1344,7 @@ with tab4:
     st.markdown("""
     <div class="section-header">
         <div class="section-label">Product</div>
-        <div class="section-title">AI Voice Studio</div>
+        <div class="section-title">Autobots</div>
         <div class="section-desc">An AI-powered audio intelligence platform combining speech recognition and neural speech synthesis.</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1382,7 +1432,7 @@ with mean and standard deviation statistics
     st.markdown("<div style='height: 3rem'></div>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align: center; padding: 1.5rem 0; border-top: 1px solid var(--border);">
-        <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); letter-spacing: -0.01em;">AI Voice Studio</div>
+        <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--accent-gold); letter-spacing: -0.01em;">Autobots</div>
         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">Powered by Streamlit · Edge-TTS · Librosa · Scikit-learn</div>
     </div>
     """, unsafe_allow_html=True)
